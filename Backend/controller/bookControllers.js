@@ -1,13 +1,15 @@
 import Author from "../model/author.model.js";
 import Book from "../model/book.model.js";
 import BookAuthorMap from "../model/bookAuthorMap.model.js";
+import Publisher from "../model/publisher.model.js";
+import PublisherAuthorMap from "../model/publisherAuthorMap.model.js";
 
 export const createBook = async(req,res) => {
-    const {bookIsbn,bookName,quantity,publicationYear,genre,publisher,authors} = req.body;
+    const {bookIsbn,bookName,quantity,publicationYear,genre,publisherName,authors} = req.body;
     const book = await Book.findOne({bookIsbn});
 
     // checking if any required field is missing 
-    if(!bookIsbn || !bookName || authors.length == 0)  {
+    if(!bookIsbn || !bookName || authors.length == 0 || !publisherName)  {
         return res.status(400).json({error:"All fields are required"})
     }
     // if book already exist
@@ -24,6 +26,14 @@ export const createBook = async(req,res) => {
         genre
     });
 
+    // checking and creating a publisher if it doesn't exist already
+
+    let publisher = await Publisher.findOne({publisherName});
+    if(!publisher) {
+        publisher = await Publisher.create({publisherName});
+    }
+
+
     // Looping over all the input author and storing in the author table and bookAuthormap table
     for(let authorName of authors) {
         let author = await Author.findOne(authorName);
@@ -33,11 +43,15 @@ export const createBook = async(req,res) => {
         }
 
         await BookAuthorMap.create({
-            author_Id : author._id,
-            book_Id : newBook._id
+            authorId : author._id,
+            bookId : newBook._id
         })
-    }
-
+        console.log(publisher._id , author._id);
+        await PublisherAuthorMap.create({
+            publisherId:publisher._id,
+            authorId:author._id
+        })
+    }    
 
     res.status(200).json(newBook)
 }

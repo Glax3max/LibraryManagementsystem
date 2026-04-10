@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
 const bookAuthorMapSchema = new mongoose.Schema({
-    author_Id:{
+    authorId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Author',
         required:true
     },
-    book_Id: {
+    bookId: {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Book",
         required:true
